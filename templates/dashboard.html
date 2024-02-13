@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satellite Monument Detection Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Monument Detection Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Monuments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Reports</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if username %}
+                        <li class="nav-item">
+                            <span class="nav-link">{{ username }}</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">Logout</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Welcome to Satellite Monument Detection Dashboard</h1>
+        <!-- Remaining content of the dashboard goes here -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h2>Upload Image for Prediction</h2>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <input type="file" class="form-control" id="image" name="image" accept=".jpg, .jpeg, .png" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Predict</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h2>Prediction Result</h2>
+                <div id="predictionResult">
+                    {% if prediction %}
+                        <p>{{ prediction }}</p>
+                    {% else %}
+                        <p>No prediction result available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#uploadForm').submit(function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                var formData = new FormData();
+                var fileInput = $('#image')[0].files[0];
+                formData.append('file', fileInput);
+
+                // Make AJAX request to the prediction endpoint
+                $.ajax({
+                    url: 'http://monument-detection-from-satellite-image.eastus.cloudapp.azure.com:8000/predict',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        // Display the prediction result on the dashboard
+                        var prediction = response.class;
+                        var confidence = response.confidence;
+                        $('#predictionResult').html('<h1>' + 'Prediction : '  + prediction + '<br> Confidence : ' + confidence + '</h1>');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                        // Handle error if necessary
+                    }
+                });
+            });
+        });
+    </script>
+    </div>
+</body>
+</html>
